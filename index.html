@@ -1022,6 +1022,47 @@ const BRACKET_ROUNDS = [
   { id:'final',label:'Final', matches:1 },
 ];
 
+// Match number, date, and venue for every knockout match (source: official schedule)
+// matchId format: "{roundId}_{index}" — index is 0-based within that round
+const MATCH_INFO = {
+  // Round of 32 — matches 73-88
+  'r32_0':  { num:73, date:'Sun, Jun 28', venue:'SoFi Stadium, Los Angeles' },
+  'r32_1':  { num:74, date:'Mon, Jun 29', venue:'Gillette Stadium, Boston' },
+  'r32_2':  { num:75, date:'Mon, Jun 29', venue:'Estadio BBVA, Monterrey' },
+  'r32_3':  { num:76, date:'Mon, Jun 29', venue:'NRG Stadium, Houston' },
+  'r32_4':  { num:77, date:'Tue, Jun 30', venue:'MetLife Stadium, New Jersey' },
+  'r32_5':  { num:78, date:'Tue, Jun 30', venue:'AT&T Stadium, Dallas' },
+  'r32_6':  { num:79, date:'Tue, Jun 30', venue:'Estadio Azteca, Mexico City' },
+  'r32_7':  { num:80, date:'Wed, Jul 1',  venue:'Mercedes-Benz Stadium, Atlanta' },
+  'r32_8':  { num:81, date:'Wed, Jul 1',  venue:"Levi's Stadium, San Francisco Bay" },
+  'r32_9':  { num:82, date:'Wed, Jul 1',  venue:'Lumen Field, Seattle' },
+  'r32_10': { num:83, date:'Thu, Jul 2',  venue:'BMO Field, Toronto' },
+  'r32_11': { num:84, date:'Thu, Jul 2',  venue:'SoFi Stadium, Los Angeles' },
+  'r32_12': { num:85, date:'Thu, Jul 2',  venue:'BC Place, Vancouver' },
+  'r32_13': { num:86, date:'Fri, Jul 3',  venue:'Hard Rock Stadium, Miami' },
+  'r32_14': { num:87, date:'Fri, Jul 3',  venue:'Arrowhead Stadium, Kansas City' },
+  'r32_15': { num:88, date:'Fri, Jul 3',  venue:'AT&T Stadium, Dallas' },
+  // Round of 16 — matches 89-96
+  'r16_0': { num:89, date:'Sat, Jul 4', venue:'Lincoln Financial Field, Philadelphia' },
+  'r16_1': { num:90, date:'Sat, Jul 4', venue:'NRG Stadium, Houston' },
+  'r16_2': { num:91, date:'Sun, Jul 5', venue:'MetLife Stadium, New Jersey' },
+  'r16_3': { num:92, date:'Sun, Jul 5', venue:'Estadio Azteca, Mexico City' },
+  'r16_4': { num:93, date:'Mon, Jul 6', venue:'AT&T Stadium, Dallas' },
+  'r16_5': { num:94, date:'Mon, Jul 6', venue:'Lumen Field, Seattle' },
+  'r16_6': { num:95, date:'Tue, Jul 7', venue:'Mercedes-Benz Stadium, Atlanta' },
+  'r16_7': { num:96, date:'Tue, Jul 7', venue:'BC Place, Vancouver' },
+  // Quarter-finals — matches 97-100
+  'qf_0': { num:97,  date:'Thu, Jul 9',  venue:'Gillette Stadium, Boston' },
+  'qf_1': { num:98,  date:'Fri, Jul 10', venue:'SoFi Stadium, Los Angeles' },
+  'qf_2': { num:99,  date:'Sat, Jul 11', venue:'Hard Rock Stadium, Miami' },
+  'qf_3': { num:100, date:'Sat, Jul 11', venue:'Arrowhead Stadium, Kansas City' },
+  // Semi-finals — matches 101-102
+  'sf_0': { num:101, date:'Tue, Jul 14', venue:'AT&T Stadium, Dallas' },
+  'sf_1': { num:102, date:'Wed, Jul 15', venue:'Mercedes-Benz Stadium, Atlanta' },
+  // Final — match 104 (match 103 is the 3rd place playoff, not modeled as a bracket round here)
+  'final_0': { num:104, date:'Sun, Jul 19', venue:'MetLife Stadium, New Jersey' },
+};
+
 // Resolve a slot descriptor like '1A', '2B', 'best3_ABCDF' to a {name, flag} team object.
 // Always returns a real team (never TBD) — if scores aren't complete yet, shows best-guess.
 function resolveSlot(desc) {
@@ -1119,8 +1160,10 @@ function renderBracket() {
         teamB = getMatchWinnerTeam(`${prevRound.id}_${m*2+1}`, roundIdx-1, m*2+1);
       }
 
+      const info = MATCH_INFO[matchId] || {};
+
       html += `<div class="match-slot" id="slot-${matchId}">
-        <div class="match-num">M${73+roundIdx===73?(m+73):(roundIdx===1?m+89:roundIdx===2?m+97:roundIdx===3?m+101:104)}</div>
+        <div class="match-num">M${info.num || '?'} · ${info.date || ''}</div>
         <div class="slot-team ${winner===0?'winner':winner===1?'loser':''}"
           onclick="pickWinner('${matchId}', 0)">
           <span class="sflag">${teamA?.flag||'🏳️'}</span>
@@ -1132,6 +1175,7 @@ function renderBracket() {
           <span class="sflag">${teamB?.flag||'🏳️'}</span>
           <span class="sname">${teamB?.name||'TBD'}</span>
         </div>
+        ${info.venue ? `<div class="match-venue">📍 ${info.venue}</div>` : ''}
       </div>`;
     }
     html += '</div>';
